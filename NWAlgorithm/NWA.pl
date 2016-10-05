@@ -1,7 +1,6 @@
 =begin
 Name: Talha Ehtasham
-CISC 436 Bioinformatics
-Homework 1
+NW Algorithm For comapring two text files
 =cut
 
 #use strict;
@@ -9,10 +8,9 @@ use List::Util 'max';
 #use warnings;
 
 #Scoring
-$identity = 4;
-$transition = -2;
-$transversion = -3;
-$gap = -8;
+$identity = 1;
+$mismatch = -1;
+$gap = -1;
 $score;
 #Flag to print DP matrix
 $DPflag = 0;
@@ -28,9 +26,6 @@ $len2;
 #Strings for final alignment display
 $alignment1;
 $alignment2;
-
-@Purines = ("A", "G");
-@Pyrimidines = ("T", "C");
 
 #Matrix for holding numbers
 @DPmatrix;
@@ -48,13 +43,21 @@ Set both sequences to scalar
 =cut
 sub readseq
 {
-	local $/ = undef;
+	#local $/ = undef;
+	$seq1 = "";
+	$seq2 = "";
 	open(my $k, $key) or die "Could not open file $key\n";
 	open(my $s, $sub) or die "Could not open file $sub\n";
-	#binmode $k;
-	#binmode $s;
-	$seq1 = <$k>;
-	$seq2 = <$s>;
+	while (my $row = <$k>) {
+		$seq1 .= $row;
+		$seq1 =~ tr/ \r\n//d;
+	}
+	close $k;
+	while (my $row = <$s>) {
+		$seq2 .= $row;
+		$seq2 =~ tr/ \r\n//d;
+	}
+	close $s;
 }
 
 =begin
@@ -64,8 +67,8 @@ sub printmatrix
 {
 	@matrix = @{$_[0]};
 	print "Dynamic Programming Matrix: \n";
-	for (my $i = 0; $i < $len2-50; $i++) {
-		for (my $j = 0; $j < $len1-50; $j++) {
+	for (my $i = 0; $i < $len2; $i++) {
+		for (my $j = 0; $j < $len1; $j++) {
 			print "$matrix[$i][$j]   ";
 		}
 		print "\n";
@@ -92,26 +95,7 @@ sub construct_matrix
 			if ($match) {
 				$trans = $identity;
 			} else {
-				#Check if this is a transition or transversion
-				if (grep {$seq1m[$j-1] eq $_} @Purines) {
-					if (grep {$seq2m[$i-1] eq $_} @Pyrimidines) {
-						$trans = $transversion;
-					}
-					else {
-						$trans = $transition;
-					}
-				}
-				elsif (grep {$seq2m[$i-1] eq $_} @Purines) {
-					if (grep {$seq1m[$j-1] eq $_} @Pyrimidines) {
-						$trans = $transversion;
-					}
-					else {
-						$trans = $transition;
-					}
-				}
-				else {
-					$trans = $transition;
-				}
+				$trans = $mismatch;
 			}
 			$diag = $DPmatrix[$i-1][$j-1] + $trans;
 			#Get the three score values, this is where scoring system is used
@@ -156,16 +140,16 @@ sub track
 		if ($direction eq 't') {
 			$score += $DPmatrix[$tracker1][$tracker2];
 			$DPmatrixL[$tracker1][$tracker2] = 'o';
-			$alignment1 .= '-';
 			$alignment2 .= substr($seq2, $tracker1, 1);
+			$alignment1 .= '-';
 			$tracker1--;
 		}
 		#Go left, add gap to subject seq, normal letter to query seq
 		elsif ($direction eq 'l') {
 			$score += $DPmatrix[$tracker1][$tracker2];
 			$DPmatrixL[$tracker1][$tracker2] = 'o';
-			$alignment1 .= substr($seq1, $tracker2, 1);
 			$alignment2 .= '-';
+			$alignment1 .= substr($seq1, $tracker2, 1);
 			$tracker2--;
 		}
 		#Go diagonal, add matching letter to both alignments
@@ -207,12 +191,14 @@ print "Subject: \n$seq2\n\n";
 #Backtrack
 &track;
 
+#Calcualte score as "per char" relative to key
+$score = int $score/$len1;
+
 #Print matrices if flag is set
 if ($DPflag == 1) {
 	&printmatrix(\@DPmatrix);
 	&printmatrix(\@DPmatrixL);
 }
-print "--------------------------\n\n\n";
 #Show alignment and score
 print "Alignment: \n\n";
 print "$alignment1\n\n";
