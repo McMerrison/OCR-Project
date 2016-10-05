@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# reads in a files with all the image keys
+# outputs individual files with image keys and appropriate titles
+
 rm -rf ImageKeys/
 mkdir ImageKeys
 while read f; do # while reading in each line of the file
