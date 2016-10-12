@@ -6,18 +6,18 @@ Test and compare the effectiveness of various Optical Character Recognition soft
 
 # Design
 While Testing:  
-	Read command line input: OCR_Program (arg 1) optional flag (images) (test keys)  
+	1) Read command line input: OCR_Program (arg 1) optional flag (images) (test keys)  
 		Runtime()  
-	Redirect output of OCR program to a data structure   
+	2) Redirect output of OCR program to a data structure   
 		String[] subjects = new String[len]  
-	Build array of expected outputs for each image (provided by user)  
+	3) Build array of expected outputs for each image (provided by user)  
 		String[] keys = new String[len]  
-	Compare test data structure with key data structure  
+	4) Compare test data structure with key data structure  
 		Needleman-Wunsch Algorithm  
-	Create array of scores, assign to test data structure  
+	5) Create array of scores, assign to test data structure  
 		int scores_OCRname[] = new int[len]  
 		scores_OCRname[n] = compare(subject[n], key[n])  
-	Prompt for next OCR  
+	6) Prompt for next OCR  
   
 While Analyzing:  
 	Prompt user for different functionality:  
