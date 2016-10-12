@@ -2,8 +2,28 @@
 OCR Statistical Comparative Analysis
 
 # Requirements
-The primary goal is to test and compare the effectiveness of various Optical Character Recognition software.
+Test and compare the effectiveness of various Optical Character Recognition software.
 
 # Design
-For each image, test should compare two text files: the key (desired output), and the subject (output of each OCR). Each comparison is scored based on most matches and fewest deletions/mismatches between the character strings.
-(Add something about writing code that allows user to run any OCR they want?)
+While Testing:
+Read command line input: OCR_Program (arg 1) optional flag (images) (test keys)
+	Runtime()
+Redirect output of OCR program to a data structure 
+	String[] subjects = new String[len]
+Build array of expected outputs for each image (provided by user)
+	String[] keys = new String[len]
+Compare test data structure with key data structure
+	Needleman-Wunsch Algorithm
+Create array of scores, assign to test data structure
+	int scores_OCRname[] = new int[len]
+	scores_OCRname[n] = compare(subject[n], key[n])
+Prompt for next OCR
+
+While Analyzing:
+Prompt user for different functionality:
+1) show average score of a given OCR: given an OCR, test images, test keys, give the average score of an OCR across all test images 
+2) compare against other OCRs: given average score of an OCR across all test images, aggregate scores
+3) graph data: specify x axis and y axis, then graph; x can be image file, y can be OCR score
+4) tabulate scores across OCRs by image: Tabulate scores across OCRs by image: show all images in rows and different OCRs in columns; populate cells with scores
+5) Save some or all data to text file.
+
