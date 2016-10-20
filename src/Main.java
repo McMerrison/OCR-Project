@@ -30,12 +30,28 @@ public class Main {
                 System.out.println(s);
             }
             
-            System.exit(0);
+            //System.exit(0);
         }
         catch (IOException e) {
-            System.out.println("exception happened - here's what I know: ");
+            System.out.println("Exception happened - here's what I know: ");
             e.printStackTrace();
             System.exit(-1);
         }
+		
+		compare();
     }
+	
+	public static void compare(/*String[] keys, String[] outputs*/) {
+		String cmd = "../TessNWAAnalysis.sh";
+		String s = null;
+		System.out.println("Running command: " + cmd);
+		try {
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		Process p = pb.start();     // Start the process.
+		p.waitFor();                // Wait for the process to finish.
+		System.out.println("Script executed successfully");
+		} 	catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
