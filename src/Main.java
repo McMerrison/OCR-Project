@@ -83,26 +83,6 @@ public class Main {
 		//System.out.println(s);
 		//System.out.println(score);
 		return s;
-		//if(process.waitFor != 0) {
-			//throw an exception / return error message
-		//}
-		/*try {
-			process = runtime.exec(cmd);
-			PrintWriter writer = new PrintWriter(
-			new OutputStreamWriter(process.getOutputStream()));
-			writer.println(200);
-			writer.close();
-			process.waitFor();
-			//printerr.println();
-			/*Process p = new ProcessBuilder("perl").redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.INHERIT).start();
-			BufferedWriter w = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-			w.write(cmd);
-			w.close();
-			p.waitFor();
-			System.out.println("Script executed successfully");
-		} 	catch (Exception e) {
-			e.printStackTrace();
-		}*/
 	}
 
 	public static ArrayList<String> getAllKeys() throws FileNotFoundException {
