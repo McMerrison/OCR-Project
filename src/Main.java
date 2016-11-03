@@ -13,7 +13,7 @@ import java.io.IOException;
 
 public class Main {
 
-	public static void runner() {
+	/*public static void runner() {
 		String s = null;
 		ArrayList<String> keys;
 		ArrayList<String> outputs;
@@ -50,8 +50,8 @@ public class Main {
 			System.exit(-1);
 		}
 	
-		//compare(/*keys, outputs*/);
-	}
+		//compare(keys, outputs);
+	}*/
 
 
 	/**
@@ -59,6 +59,8 @@ public class Main {
 	* Calls the .pl script to compare key vs. output of OCR
 	* TODO: Redirect input in .pl file so key/output come from arrays, not files
 	* TODO: Redirect output scores to matrix
+	* @param key string, output of OCR string
+	* @return score from this alignment
 	**/
 	public static int compare(String key, String output) {
 		String[] cmd = {"perl", "NWA.pl", key, output};
@@ -85,21 +87,27 @@ public class Main {
 		return s;
 	}
 
-	public static ArrayList<String> getAllKeys() throws FileNotFoundException {
+	/**
+	* Given a folder, parse each text file into a string
+	* Store string in ArrayList
+	* @param path of folder containing text files
+	* @return array of strings, each containing the contents of one text file
+	**/
+	public static ArrayList<String> getAllKeys(String path) throws FileNotFoundException {
 		// for all files in ImageKeys
 		// scan in all text to String
 		// add to arrayList and return
 		String s = "";
 		String filepath;
 		ArrayList<String> allKeys = new ArrayList<>();
-		Path dir = Paths.get("ImageKeys");
+		Path dir = Paths.get(path);
 		int files = 0;
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
 			//For each file
 			for (Path file: stream) {
 				//System.out.println("Reading from " + file.getFileName());
 				//Scanner in = new Scanner(new File("ImageKeys/Demolm01.txt"));
-				filepath = "ImageKeys/" + file.getFileName();
+				filepath = path + file.getFileName();
 				Scanner in = new Scanner(new File(filepath));
 				//Pattern grab = Pattern.compile("[a-z]");
 				while (in.hasNext()) {
@@ -120,6 +128,10 @@ public class Main {
 
 	}
 	
+	/**
+	* @param array of scores
+	* @return average of scores
+	**/
 	public static int getAverage(int[] array) {
 		int sum = 0;
 		int i = array.length;
@@ -128,18 +140,25 @@ public class Main {
 		}
 		return sum/i;
 	}
-
-	public static void main(String args[]) {
+	
+	/**
+	* Use given directories of keys and outputs, parse text files into strings
+	* Store strings in ArrayLists
+	* Run compare() on each index to determine accuracy of OCR based on expected output
+	* @param directory containing keys, directory containing outputs
+	* (TODO): @return score array
+	*/
+	public static void analyzeOCR(String keydir, String outputdir) {
 		try {
 			//Array of keys and outputs
 			ArrayList<String> keys;
 			ArrayList<String> outputs;
 			
 			//Get key values from given directory
-			keys = getAllKeys();
+			keys = getAllKeys(keydir);
 			//Get outputs from given directory
 			//NOTE: Currently reads from same directory as keys, change later
-			outputs = getAllKeys();
+			outputs = getAllKeys(outputdir);
 			
 			//Create score array from # of keys (matches # of outputs)
 			int[] scores = new int[keys.size()];
@@ -160,5 +179,25 @@ public class Main {
 		} catch (FileNotFoundException e) {
 			System.err.println("FAIL: " + e.getMessage() );
 		}
+	}
+
+	/**
+	* For each OCR:
+	* (TODO): Run OCR on image files, generate a folder of outputs
+	* (TODO): Pass the name of this folder to outputdir
+	* (Done): Pass outputdir to analyze method.
+	* (Done): analyzeOCR will call:
+	* 	(Done): getAllKeys() to parse data 
+	*	(Done): compare() to generate scores
+	* (TODO): Keep scores in separate data structures, allow user to print info
+	*/
+	public static void main(String args[]) {
+		//This is where the keys are stored, does not change during session
+		String keydir = "ImageKeys/";
+		String outputdir = "";
+		//For each OCR 
+			//generate a folder of outputs
+			outputdir = "TesseractOutput/";
+			analyzeOCR(keydir, outputdir);
 	}
 }
