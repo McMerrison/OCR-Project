@@ -174,16 +174,16 @@ Read the number of arguments
 If one, it is only the text filefield
 If more, make sure second one is the -o 1 flag
 =cut
-$key = $ARGV[0];
-$sub = $ARGV[1];
+$seq1 = $ARGV[0];
+$seq2 = $ARGV[1];
 #Print some information
-&readseq;
+#&readseq;
 $len1 = length($seq1)+1;
 $len2 = length($seq2)+1;
 @seq1m = $seq1 =~ /./g;
 @seq2m = $seq2 =~ /./g;
-print "\nKey: \n$seq1\n\n";
-print "Subject: \n$seq2\n\n";
+#print "\nKey: \n$seq1\n\n";
+#print "Subject: \n$seq2\n\n";
 
 #Build the matrix
 &construct_matrix;
@@ -200,9 +200,9 @@ if ($DPflag == 1) {
 	&printmatrix(\@DPmatrixL);
 }
 #Show alignment and score
-print "Alignment: \n\n";
-print "$alignment1\n\n";
-print "$alignment2\n";
-print "Score: \n";
+#print "Alignment: \n\n";
+#print "$alignment1\n\n";
+#print "$alignment2\n";
+#print "Score: \n";
 print "$score\n";
 
