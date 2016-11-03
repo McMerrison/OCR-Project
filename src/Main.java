@@ -157,7 +157,6 @@ public class Main {
 			//Get key values from given directory
 			keys = getAllKeys(keydir);
 			//Get outputs from given directory
-			//NOTE: Currently reads from same directory as keys, change later
 			outputs = getAllKeys(outputdir);
 			
 			//Create score array from # of keys (matches # of outputs)
