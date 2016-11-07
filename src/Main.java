@@ -149,7 +149,7 @@ public class Main {
 	* @param directory containing keys, directory containing outputs
 	* (TODO): @return score array
 	*/
-	public static int[] runOCR(String keydir, String outputdir) {
+	public static int[] align(String keydir, String outputdir) {
 		try {
 			//Array of keys and outputs
 			ArrayList<String> keys;
@@ -226,7 +226,7 @@ public class Main {
 			//generate a folder of outputs
 			outputdir = "TesseractOutput/";
 			System.out.println("Testing...");
-			scores[x] = runOCR(keydir, outputdir);
+			scores[x] = align(keydir, outputdir);
 			System.out.println("Done.");
 			//x++
 			
