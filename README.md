@@ -5,7 +5,7 @@ OCR Statistical Comparative Analysis
 Test and compare the effectiveness of various Optical Character Recognition software.
 
 # Design
-While Testing:  
+Testing Stage:  
 	1) Read command line input: OCR_Program (arg 1) optional flag (images) (test keys)  
 		- Runtime()  
 	2) Redirect output of OCR program to a data structure   
@@ -19,11 +19,28 @@ While Testing:
 		- scores_OCRname[n] = compare(subject[n], key[n])  
 	6) Prompt for next OCR  
   
-While Analyzing:  
+Analyzing Stage:  
 	Prompt user for different functionality:  
 	1) show average score of a given OCR: given an OCR, test images, test keys, give the average score of an OCR across all test images   
 	2) compare against other OCRs: given average score of an OCR across all test images, aggregate scores  
 	3) graph data: specify x axis and y axis, then graph; x can be image file, y can be OCR score  
 	4) tabulate scores across OCRs by image: Tabulate scores across OCRs by image: show all images in rows and different OCRs in columns; populate cells with scores  
-	5) Save some or all data to text file.  
+	5) Save some or all data to text file.
+	
+# Tests
+Manual JUnit testing (See folder)
 
+Testing Stage features:
+	1) 
+	2)
+	3) TESTED
+	4) TESTED
+	5) TESTED
+	6)
+
+Analyzing Stage Features:
+	1) TESTED
+	2)
+	3)
+	4)
+	5)
