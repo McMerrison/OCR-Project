@@ -23,7 +23,7 @@ Compare test data structure with key data structure
 	Needleman-Wunsch Algorithm
 Create array of scores, assign to test data structure
 	int scores_OCRname[] = new int[len]
-	scores_OCRname[n] = compare(subject[n], key[n])
+	scores_OCRname[n] = compare(subject[n], key[n]) "\n"
 Prompt for next OCR
 
 
