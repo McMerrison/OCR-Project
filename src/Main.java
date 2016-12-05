@@ -1,59 +1,10 @@
-//import jdk.nashorn.internal.runtime.arrays.ArrayLikeIterator;
-
 import java.io.*;
-//import java.util.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.Pattern;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.InputMismatchException;
 
 public class Main {
-
-	/*public static void runner() {
-		String s = null;
-		ArrayList<String> keys;
-		ArrayList<String> outputs;
-
-		try {
-
-			// run the Unix "ps -ef" command
-			// using the Runtime exec method:
-			Process p = Runtime.getRuntime().exec("ls -al");
-
-			BufferedReader stdInput = new BufferedReader(new
-					InputStreamReader(p.getInputStream()));
-
-			BufferedReader stdError = new BufferedReader(new
-					InputStreamReader(p.getErrorStream()));
-
-			// read the output from the command
-			System.out.println("Here is the standard output of the command:\n");
-			while ((s = stdInput.readLine()) != null) {
-				System.out.println(s);
-			}
-
-			// read any errors from the attempted command
-			System.out.println("Here is the standard error of the command (if any):\n");
-			while ((s = stdError.readLine()) != null) {
-				System.out.println(s);
-			}
-
-			//System.exit(0);
-		}
-		catch (IOException e) {
-			System.out.println("Exception happened - here's what I know: ");
-			e.printStackTrace();
-			System.exit(-1);
-		}
-	
-		//compare(keys, outputs);
-	}*/
-
 
 	/**
 	* Compares corresponding indexes of the key and output arrays
@@ -126,21 +77,8 @@ public class Main {
 		}
 		return allKeys;
 		//Scanner in = new Scanner(new file ());
-
 	}
 	
-	/**
-	* @param array of scores
-	* @return average of scores
-	**/
-	public static int getAverage(int[] array) {
-		int sum = 0;
-		int i = array.length;
-		for (int n = 0; n < i; n++) {
-			sum += array[n];
-		}
-		return sum/i;
-	}
 	
 	/**
 	* Use given directories of keys and outputs, parse text files into strings
@@ -208,69 +146,63 @@ public class Main {
 	* (TODO): Implement each method of analysis
 	*/
 	public static void main(String args[]) {
-		//This is where the keys are stored, does not change during session
-		String keydir = "ImageKeys/";
-		String outputdir = "";
-		System.out.println("How many OCRs?");
+		String imageDir = "/Images";//first argument is directory of images
+		if(args.length>0)
+			imageDir = args[0];
+		String keydir = "ImageKeys/";//second argument is directory of image keys
+		if(args.length>1)
+			keydir = args[1];
+		ArrayList<OCR> OCRs = new ArrayList<>();
+		ArrayList<String> Keys = new ArrayList<>();
+		try {
+			Keys = getAllKeys(keydir);
+		} catch (FileNotFoundException e1) {
+			System.out.println("ERROR: Can't locate keys directory");
+			e1.printStackTrace();
+		}
 		Scanner s = new Scanner(System.in);
-		int numOCR = s.nextInt();
-		int[][] scores = new int[numOCR][43];
-		String[] OCRs = new String[numOCR];
-		
-		//Testing OCRs
-		int x = 0;
-		//For each OCR 
-			System.out.println("Select a name for OCR");
-			OCRs[x] = s.next();
-			//Run the OCR
-			//generate a folder of outputs
-			outputdir = "TesseractOutput/";
-			System.out.println("Testing...");
-			scores[x] = align(keydir, outputdir);
-			System.out.println("Done.");
-			//x++
+		//	outputdir = "TesseractOutput/";
+		//	System.out.println("Testing...");
+		//	scores[x] = align(keydir, outputdir);
+		//	System.out.println("Done.");
 			
 		//Analyzing OCRs
-		System.out.println();
 		boolean analyzing = true;
 		//Error to fix: Goes into infinite loop when letter is entered
 		while (analyzing) {
-			printOCR(OCRs);
 			System.out.println("Select an option:\n" +
 			"0 - Show scores of OCR\n" +
-			"1 - Show Average Scores\n" +
+			"1 - Show Summary of all OCRs\n" +
 			"2 - Compare OCRs\n" +
-			"3 - Output data as graph\n" +
-			"4 - Tabulate data by image\n" +
+			"3 - Add an OCR\n" +
+			"4 - Remove an OCR\n" +
 			"5 - Save scores to file\n" +
 			"6 - Exit");
-			
-			//ERROR to fix: 
-			//Goes into infinite loop when letter is entered instead of number
+			//add import ocr scores
 			int option;
 			try {
-				option = s.nextInt();
+				do{
+					while (!s.hasNextInt()) s.next();//This should fix the infinite loop
+					option = s.nextInt();
+				}while(option < 0 || option > 7);//Make sure selected number is in requested range
 			} catch (InputMismatchException e) {
 				System.out.println("Please enter a number 1-6");
 				option = 7;
 			}
 			
 			switch (option) {
-				case 0: System.out.println("Scores of "+
-						OCRs[0] + ": ");
-						printScores(scores[0]);
+				case 0://select an ocr to print
+					//go through ocrs.image.s and print them to console all pretty
 						break;
 						
-				case 1: for (int n = 0; n < numOCR; n++) {
-							System.out.println("Average of "+
-							OCRs[n] + " is: " + getAverage(scores[n]));
-						}
+				case 1: //go through all ocrs.avescore,highscore, lowscore and print all pretty
 						break;
 						
 				case 2:
 						break;
 						
 				case 3:
+						OCRs.add(new OCR(s,imageDir));
 						break;
 						
 				case 4:
