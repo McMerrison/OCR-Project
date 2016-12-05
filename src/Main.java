@@ -185,15 +185,36 @@ public class Main {
 	
 	public static void printScores(int[] array) {
 		for (int n = 0; n < array.length; n++) {
-			System.out.println("Score of image " + n + ": " + array[n]);
+			System.out.println("Image " + n + ": " + array[n]);
+		}
+	}
+	
+	public static void printScoresCompare(String ocr1, String ocr2, int[] array1, int[] array2) {
+		System.out.println("                 " + ocr1 + "   " + ocr2);
+		for (int n = 0; n < array1.length; n++) {
+			System.out.println("Image " + n + ": " 
+			+ "\n" + ocr1 + ": " + array1[n] 
+			+ "\n" + ocr2 + ": " + array2[n] + "\n"); 
 		}
 	}
 	
 	public static void printOCR(String[] array) {
 		System.out.println("OCRS:");
+		System.out.println("ID: Name");
 		for (int n = 0; n < array.length; n++) {
-			System.out.println(n + " - " + array[n]);
+			System.out.println(n + ": " + array[n]);
 		}
+	}
+	
+	public static void pressAny()
+	{ 
+        System.out.println("Press Enter to continue...");
+        try
+        {
+            System.in.read();
+        }  
+        catch(Exception e)
+        {}  
 	}
 
 	/**
@@ -205,86 +226,124 @@ public class Main {
 	* 	(Done): getAllKeys() to parse data 
 	*	(Done): compare() to generate scores
 	* (Done): Keep scores in separate data structures, allow user to select options
-	* (TODO): Implement each method of analysis
+	* (Done): Implement each method of analysis
 	*/
-	public static void main(String args[]) {
+	public static void main(String args[]) throws FileNotFoundException {
 		//This is where the keys are stored, does not change during session
-		String keydir = "ImageKeys/";
+		String f = "parameters.txt";
+		Scanner s = new Scanner(new File(f)); 
+		Scanner t = new Scanner(System.in);
+		System.out.println("Provide name of directory containing key outputs");
+		String keydir = s.next() + "/";
 		String outputdir = "";
-		System.out.println("How many OCRs?");
-		Scanner s = new Scanner(System.in);
-		int numOCR = s.nextInt();
-		int[][] scores = new int[numOCR][43];
-		String[] OCRs = new String[numOCR];
 		
+		//For now: Choose '1' OCR and name it "Tess" (arbitrary)
+		System.out.println("How many OCRs?");
+		int numOCR = s.nextInt();
+		System.out.println("How many images in this set?");
+		int numImg = s.nextInt();
+		int[][] scores = new int[numOCR][numImg];
+		String[] OCRs = new String[numOCR];
+		System.out.println();
 		//Testing OCRs
-		int x = 0;
-		//For each OCR 
-			System.out.println("Select a name for OCR");
+		for (int x = 0; x < numOCR; x++) {
+			System.out.println("Select a name for OCR " + (x+1));
 			OCRs[x] = s.next();
 			//Run the OCR
 			//generate a folder of outputs
-			outputdir = "TesseractOutput/";
-			System.out.println("Testing...");
+			System.out.println("Please provide directory of outputs");
+			outputdir = s.next() + "/";
+			System.out.println("Analyzing...");
 			scores[x] = align(keydir, outputdir);
 			System.out.println("Done.");
-			//x++
-			
+		}	
+		
 		//Analyzing OCRs
 		System.out.println();
 		boolean analyzing = true;
 		//Error to fix: Goes into infinite loop when letter is entered
 		while (analyzing) {
 			printOCR(OCRs);
+			System.out.println("----------");
 			System.out.println("Select an option:\n" +
 			"0 - Show scores of OCR\n" +
 			"1 - Show Average Scores\n" +
 			"2 - Compare OCRs\n" +
-			"3 - Output data as graph\n" +
-			"4 - Tabulate data by image\n" +
-			"5 - Save scores to file\n" +
-			"6 - Exit");
+			"3 - Tabulate data by image\n" +
+			"4 - Save scores to file\n" +
+			"5 - Exit");
 			
 			//ERROR to fix: 
 			//Goes into infinite loop when letter is entered instead of number
 			int option;
 			try {
-				option = s.nextInt();
+				option = t.nextInt();
 			} catch (InputMismatchException e) {
 				System.out.println("Please enter a number 1-6");
 				option = 7;
 			}
 			
 			switch (option) {
-				case 0: System.out.println("Scores of "+
-						OCRs[0] + ": ");
-						printScores(scores[0]);
-						break;
-						
+				case 0: System.out.println("Display scores of which OCR? (enter ID)");
+						int ID = t.nextInt();
+						System.out.println("Scores of "+
+						OCRs[ID] + ": ");
+						printScores(scores[ID]);
+						System.out.println();
+						break;						
 				case 1: for (int n = 0; n < numOCR; n++) {
 							System.out.println("Average of "+
 							OCRs[n] + " is: " + getAverage(scores[n]));
 						}
+						System.out.println();
 						break;
 						
-				case 2:
+				case 2: System.out.println("ID of First OCR: ");
+						int first = t.nextInt();
+						System.out.println("ID of Second OCR: ");
+						int second = t.nextInt();
+						System.out.println("Average of " + OCRs[first] + ": " + getAverage(scores[first]));
+						System.out.println("Average of " + OCRs[second] + ": " + getAverage(scores[second]));
+						System.out.println("Compare by image? (y/n)");
+						String ans = t.next();
+						if (ans.equals("y")) {
+							printScoresCompare(OCRs[first], OCRs[second], scores[first], scores[second]);
+						} else if (ans.equals("n")) {
+							break;
+						} else {
+							System.out.println("Please enter (y/n)");
+						}
 						break;
 						
 				case 3:
 						break;
 						
-				case 4:
+				case 4: try {
+							PrintWriter out = new PrintWriter("OCRData.txt");
+							for (int n = 0; n < numOCR; n++) {
+								out.println(OCRs[n] + ":");
+								for (int m = 0; m < scores[n].length; m++) {
+									out.println("Image " + m + ": " + scores[n][m]);
+								}
+								out.println("Average Score: " + getAverage(scores[n]));
+								out.println();
+							}
+							System.out.println("Saved to 'OCRData.txt'");
+							out.close();
+						} catch (FileNotFoundException e) {
+							
+						}
 						break;
 						
-				case 5:
+				case 5: analyzing = false;
 						break;
 						
 				case 6: analyzing = false;
 						break;
 						
-				case 7: break;
-						
+				default: break;
 			}
+			pressAny();
 			System.out.println();
 		}
 	}
