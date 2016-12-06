@@ -5,19 +5,17 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 import java.util.InputMismatchException;
 
 public class Main {
-	
-	
+
 	public static boolean saveListToFile(String folderName,ArrayList<String> output){
 		File dir = new File(folderName);
 		if(dir.mkdir()){
 			int i = 0;
 			try {
 				for(String s: output){
-				PrintWriter out = new PrintWriter(folderName+"/Output" + i +".txt");
+				PrintWriter out = new PrintWriter(folderName+"Output" + i +".txt");
 				out.print(s);
 				out.close();
 				i++;
@@ -43,9 +41,9 @@ public class Main {
 	* @param imageDir String, output of OCR string
 	* @return outputs ArrayList<String>, returns an arraylist with all outputs
 	**/
-	public static ArrayList<String> runner(String cmd,String imageDir) {
+	public static ArrayList<Image> runner(String cmd,String imageDir) {
 		String filepath;
-		ArrayList<String> outputs = new ArrayList<>();
+		ArrayList<Image> outputs = new ArrayList<>();
 		imageDir = "TestImages/";//for testing purposes
 		cmd = "bmptopnm picture.bmp | gocr -v 0 -m 0 -e - -f UTF8 -"; //this string doesnt work because of the pipe
 		Path dir = Paths.get(imageDir);
@@ -76,7 +74,8 @@ public class Main {
 					  while ((line = buf.readLine()) != null) {
 					    output += line + "\n";
 					  }
-					  outputs.add(output);
+					  Image img = new Image(output);
+					  outputs.add(img);
 
 					  System.out.println(output);
 
@@ -89,38 +88,13 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
-			
-			
+				
 		}else{
 			System.out.println("ERROR: picture.bmp not in command.");
 		}
-		/*
-		Process p = Runtime.getRuntime().exec("ls -al");
-
-		BufferedReader stdInput = new BufferedReader(new
-				InputStreamReader(p.getInputStream()));
-
-		BufferedReader stdError = new BufferedReader(new
-				InputStreamReader(p.getErrorStream()));
-
-		// read the output from the command
-		System.out.println("Here is the standard output of the command:\n");
-		while ((s = stdInput.readLine()) != null) {
-			System.out.println(s);
-		}
-
-		// read any errors from the attempted command
-		System.out.println("Here is the standard error of the command (if any):\n");
-		while ((s = stdError.readLine()) != null) {
-			System.out.println(s);
-		}
-
-		//System.exit(0);
-*/
 		return outputs;
 	}
+	
 
 
 	/**
@@ -193,22 +167,48 @@ public class Main {
 			System.err.println(x);
 		}
 		return allKeys;
-		//Scanner in = new Scanner(new file ());
-
 	}
 	
 	/**
-	* @param array of scores
-	* @return average of scores
+	* Given a folder, parse each text file into a string
+	* Store string in ArrayList
+	* @param path of folder containing text files
+	* @return array of strings, each containing the contents of one text file
 	**/
-	public static int getAverage(int[] array) {
-		int sum = 0;
-		int i = array.length;
-		for (int n = 0; n < i; n++) {
-			sum += array[n];
+	public static ArrayList<Image> loadOCR(String path) throws FileNotFoundException {
+		// for all files in ImageKeys
+		// scan in all text to String
+		// add to arrayList and return
+		String s = "";
+		String filepath;
+		ArrayList<Image> Images = new ArrayList<>();
+		Path dir = Paths.get(path);
+		int files = 0;
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+			//For each file
+			for (Path file: stream) {
+				//System.out.println("Reading from " + file.getFileName());
+				//Scanner in = new Scanner(new File("ImageKeys/Demolm01.txt"));
+				filepath = path + file.getFileName();
+				Scanner in = new Scanner(new File(filepath));
+				//Pattern grab = Pattern.compile("[a-z]");
+				while (in.hasNext()) {
+					s += in.next();
+					//System.out.println(s);
+				}
+				Image i = new Image(s);
+				Images.add(i);
+				s = "";
+				files++;
+			}
+		} catch (IOException | DirectoryIteratorException x) {
+			// IOException can never be thrown by the iteration.
+			// In this snippet, it can only be thrown by newDirectoryStream.
+			System.err.println(x);
 		}
-		return sum/i;
+		return Images;
 	}
+	
 	
 	/**
 	* Use given directories of keys and outputs, parse text files into strings
@@ -217,50 +217,54 @@ public class Main {
 	* @param directory containing keys, directory containing outputs
 	* (TODO): @return score array
 	*/
-	public static int[] align(String keydir, String outputdir) {
-		try {
-			//Array of keys and outputs
-			ArrayList<String> keys;
-			ArrayList<String> outputs;
-			
-			//Get key values from given directory
-			keys = getAllKeys(keydir);
-			//Get outputs from given directory
-			outputs = getAllKeys(outputdir);
-			
-			//Create score array from # of keys (matches # of outputs)
-			int[] scores = new int[keys.size()];
-			
-			//Uncomment to see what's in the arrays
-			/*System.out.println("List of Keys:");
-			System.out.println(keys);
-			System.out.println("List of Outputs:");
-			System.out.println(outputs);*/
-			
-			//For each key/output matching, get the alignment score and store in array
-			//Indexes will match
-			for (int i = 0; i < keys.size(); i++) {
-				scores[i] = compare(keys.get(i), outputs.get(i));
-				//System.out.println("Score of alignment " + i + ": " + scores[i]);
-			}
-			//System.out.println("Average score is " + getAverage(scores));
-			return scores;
-		} catch (FileNotFoundException e) {
-			System.err.println("FAIL: " + e.getMessage() );
-			return null;
+	public static OCR align(ArrayList<String> a, OCR o) {
+		int size = a.size();
+		if(a.size()>o.Images.size()){
+			size = o.Images.size();
+		}
+		for (int i = 0; i < size; i++) {
+			o.Images.get(i).score = compare(a.get(i), o.Images.get(i).output);
+			//System.out.println("Score of alignment " + i + ": " + scores[i]);
+		}
+		//System.out.println("Average score is " + getAverage(scores));
+		o.calcScores();
+		return o;
+	}
+	
+	public static void printScores(ArrayList<Image> Images) {
+		int i = 0;
+		for (Image img: Images) {
+			System.out.println("Image " + i + ": " + img.score);
+			i++;
 		}
 	}
 	
-	public static void printScores(int[] array) {
-		for (int n = 0; n < array.length; n++) {
-			System.out.println("Score of image " + n + ": " + array[n]);
+	public static void printScoresCompare(OCR f, OCR s) {
+		int amt = f.Images.size();
+		if(f.Images.size()>s.Images.size()){
+			amt = s.Images.size();
+		}
+		System.out.println(String.format("\n%-10s   %10s   %10s","Image",f.name,s.name));
+		for (int i = 0; i<amt; i++) {
+			System.out.println(String.format("%-10s   %10d   %10d","Image"+i+":",f.Images.get(i).score,s.Images.get(i).score ));
+			//System.out.println("Image " + i + ": " 
+			//+ "\n" + f.name + ": " + f.Images.get(i).score 
+			//+ "\n" + s.name + ": " + f.Images.get(i).score + "\n"); 
 		}
 	}
 	
-	public static void printOCR(String[] array) {
-		System.out.println("OCRS:");
-		for (int n = 0; n < array.length; n++) {
-			System.out.println(n + " - " + array[n]);
+	public static void printOCRs(ArrayList<OCR> OCRs) {
+		int i = 0;
+		for(OCR o: OCRs){
+			System.out.println("["+i+"] - " + o.name);
+			i++;
+		}
+	}
+	
+	public static void analyzeOCRs(ArrayList<OCR> ocrs,ArrayList<String> keys){
+		for(OCR o: ocrs){
+			align(keys,o);
+			o.calcScores();
 		}
 	}
 
@@ -273,88 +277,251 @@ public class Main {
 	* 	(Done): getAllKeys() to parse data 
 	*	(Done): compare() to generate scores
 	* (Done): Keep scores in separate data structures, allow user to select options
-	* (TODO): Implement each method of analysis
+	* (Done): Implement each method of analysis
+	 * @throws FileNotFoundException 
 	*/
-	public static void main(String args[]) {
+	public static void main(String args[]) throws FileNotFoundException{
 		//This is where the keys are stored, does not change during session
-		String keydir = "ImageKeys/";
-		String outputdir = "";
-		System.out.println("How many OCRs?");
 		Scanner s = new Scanner(System.in);
-		int numOCR = s.nextInt();
-		int[][] scores = new int[numOCR][43];
-		String[] OCRs = new String[numOCR];
+		Scanner t = new Scanner(System.in);
+		ArrayList<OCR> OCRs = new ArrayList<>();
+		System.out.println("Loading config file 'parameters.txt' .....");
+		ArrayList<String> Keys = new ArrayList<>();
+		String keyDir = "ImageKeys/";
+		String imageDir = "TestImages/";
+        try {
+    	    File file = new File("parameters.txt");
+            Scanner input = new Scanner(file);
+
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+                if(line.contains("(Keys Folder)")){
+                	keyDir = input.nextLine();
+                }else if(line.contains("(Images Folder)")){
+                	imageDir = input.nextLine();
+                }else if(line.contains("(OCR)")){
+                	while(input.hasNextLine()){
+                		String oName = input.nextLine();
+                		oName = oName.replace("\n", "").replace("\r", "").replace(" ", "");
+                		System.out.println("Loading the follwing OCRs:");
+                		System.out.println("- "+oName);
+                		OCR ocr = new OCR(oName,loadOCR(oName+"/"));
+                		OCRs.add(ocr);
+                	}
+                }
+            }
+            input.close();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+		Keys = getAllKeys(keyDir);
+		analyzeOCRs(OCRs,Keys);
+		System.out.println("Done.\n");
 		
-		//Testing OCRs
-		int x = 0;
-		//For each OCR 
-			System.out.println("Select a name for OCR");
-			OCRs[x] = s.next();
-			//Run the OCR
-			//generate a folder of outputs
-			outputdir = "TesseractOutput/";
-			System.out.println("Testing...");
-			scores[x] = align(keydir, outputdir);
-			System.out.println("Done.");
-			//x++
-			
-		//Analyzing OCRs
-		System.out.println();
 		boolean analyzing = true;
 		//Error to fix: Goes into infinite loop when letter is entered
 		while (analyzing) {
-			printOCR(OCRs);
+			System.out.println("----------");
 			System.out.println("Select an option:\n" +
 			"0 - Show scores of OCR\n" +
 			"1 - Show Average Scores\n" +
 			"2 - Compare OCRs\n" +
-			"3 - Output data as graph\n" +
-			"4 - Tabulate data by image\n" +
-			"5 - Save scores to file\n" +
-			"6 - Exit");
+			"3 - Add an OCR\n" +
+			"4 - Save scores to file\n"+
+			"5 - Exit");
 			
 			//ERROR to fix: 
 			//Goes into infinite loop when letter is entered instead of number
-			int option;
+			int option = 7;
 			try {
-				option = s.nextInt();
+				do{
+					while (!s.hasNextInt()) s.next();//This should fix the infinite loop
+					option = s.nextInt();
+				}while(option < 0 || option > 5);//Make sure selected number is in requested range
 			} catch (InputMismatchException e) {
-				System.out.println("Please enter a number 1-6");
-				option = 7;
+				System.out.println("Please enter a number 1-5");
 			}
-			
 			switch (option) {
-				case 0: System.out.println("Scores of "+
-						OCRs[0] + ": ");
-						printScores(scores[0]);
+				case 0: System.out.println("Display scores of which OCR? (Enter ID)");
+						printOCRs(OCRs);
+						int id = s.nextInt();
+						OCR tmp = OCRs.get(id);
+						System.out.println("Scores of "+
+						tmp.name + ": ");
+						printScores(tmp.Images);
+						System.out.println();
+						break;						
+				case 1: for (OCR i: OCRs) {
+							i.calcScores();
+							i.printScores();
+						}
+						System.out.println();
 						break;
 						
-				case 1: for (int n = 0; n < numOCR; n++) {
-							System.out.println("Average of "+
-							OCRs[n] + " is: " + getAverage(scores[n]));
+				case 2: printOCRs(OCRs);//this needs work------------------------ 
+						System.out.println(OCRs.size());
+						if(OCRs.size()<2){
+							System.out.println("You need to have atleast 2 OCRs Loaded to use this option");
+							break;
+						}
+						System.out.println("ID of First OCR: ");
+						int first = t.nextInt();
+						System.out.println("ID of Second OCR: ");
+						int second = t.nextInt();
+						OCR fOCR = OCRs.get(first);
+						OCR sOCR = OCRs.get(second);
+						System.out.println("Average of " + fOCR.name + ": " + fOCR.avgScore);
+						System.out.println("Average of " + sOCR.name + ": " + sOCR.avgScore);
+						System.out.println("Compare by image? (y/n)");
+						String ans = t.next();
+						if (ans.equals("y")) {
+							printScoresCompare(fOCR,sOCR);//this is what needs work
+						} else if (ans.equals("n")) {
+							break;
+						} else {
+							System.out.println("Please enter (y/n)");
 						}
 						break;
 						
-				case 2:
-					runner("","");
-						break;
-						
 				case 3:
+						OCR otmp = new OCR();
+						System.out.println("Please enter a name for this OCR");
+						otmp.name = s.next();
+						System.out.println("Would you like to load this OCR via a command or a folder?\n"
+										 + "Enter 1 for Command or 2 for Folder");
+						int answer = s.nextInt();
+						if(answer == 1){
+							System.out.println("Please enter the command used to run this OCR\n" +
+									"Use image.bmp where you would normally place the image filename.");
+							otmp.cmd = s.next();
+							otmp.Images = runner(otmp.cmd, imageDir);
+							if(otmp.Images == null){
+								System.out.println("ERROR: Command failed to ");
+								break;
+							}
+							align(Keys,otmp);
+							otmp.calcScores();
+							if(OCRs.add(otmp)){
+								System.out.println("Added: "+ otmp.name+"\n");
+							}
+						}else if(answer == 2){
+							System.out.println("Please enter the folder name or path\n"
+									+ "Example: gocr\\ ");
+	                		String oName = s.next();
+	                		oName = oName.replace("\n", "").replace("\r", "").replace(" ", "");
+							otmp.folder = oName;
+							System.out.println(otmp.folder);
+							otmp.Images = loadOCR("ImageKeys/");
+							align(Keys,otmp);
+							otmp.calcScores();
+							if(OCRs.add(otmp)){
+								System.out.println("Added: "+ otmp.name+"\n");
+							}
+						}else{
+							System.out.println("You didn't enter 1 or 2");
+						}
 						break;
 						
-				case 4:
+				case 4: try {
+							PrintWriter out = new PrintWriter("OCRData.txt");
+							for(OCR o: OCRs){
+								o.calcScores();
+								out.println("\n-----"+ o.name +"-----");
+								out.println("Average Score: "+ o.avgScore);
+								out.println("Highest Score: "+ o.highScore);
+								out.println("Lowest Score: "+ o.lowScore +"\n");
+							}
+							out.close();
+						} catch (FileNotFoundException e) {
+							
+						}
 						break;
 						
-				case 5:
+				case 5: analyzing = false;
 						break;
 						
 				case 6: analyzing = false;
 						break;
 						
-				case 7: break;
-						
+				default: break;
 			}
 			System.out.println();
 		}
+	}
+}
+
+class OCR {
+	public String name;//name of ocr
+	String cmd;//cmd to run ocr
+	String folder;
+	ArrayList<Image> Images = new ArrayList<Image>();//arraylist containing output and score
+	int avgScore;//average score the ocr produced
+	int highScore;//highest score the ocr produced
+	int lowScore;//lowest score the ocr produced
+	
+	public OCR(){
+	}
+	public OCR(String name, ArrayList<Image> i){
+		String fname = name+"/";
+		folder = fname;
+		this.name = name;
+		Images = i;
+	}
+	
+	/**
+	* @param array of scores
+	* @return average of scores
+	**/
+	public void calcScores(){
+		avgScore = getAverage();
+		highScore = getHighest();
+		lowScore = getLowest();
+	}
+	
+	public void printScores(){
+		System.out.println("\n-----"+ name +"-----");
+		System.out.println("Average Score: "+ avgScore);
+		System.out.println("Highest Score: "+ highScore);
+		System.out.println("Lowest Score: "+ lowScore);
+	}
+	
+	private int getHighest(){
+		int highscore = -10000;
+		for(Image i: Images){
+			if(i.score>highscore){
+				highscore = i.score;
+			}
+		}
+		return highscore;
+	}
+	
+	private int getLowest(){
+		int lowscore = +10000;
+		for(Image i: Images){
+			if(i.score<lowscore){
+				lowscore = i.score;
+			}
+		}
+		return lowscore;
+	}
+	
+	private int getAverage() {
+		int sum = 0;
+		int i = Images.size();
+		for (int n = 0; n < i; n++) {
+			sum += Images.get(n).score;
+		}
+		return sum/i;
+	}
+	
+}
+
+class Image {
+	String output;
+	int score;
+	
+	public Image(String output){
+		this.output = output;
 	}
 }
