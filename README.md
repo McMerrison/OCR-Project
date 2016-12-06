@@ -54,8 +54,11 @@ Prompt user for different functionality:
 
 ## Instructions
 1. Download "src" folder
+
 2. chdir into src
+
 4. Open "Parameters.txt"
+
 5. Edit as such:
 	
 	line 1: Path to directory of keys (text files with expected output of image set)*
@@ -70,8 +73,10 @@ Prompt user for different functionality:
 	
 	- Path to directory containing output text files of this OCR*
 	
+
 6. Run "javac Main.java"
 7. Run "java Main"
+
 8. Follow prompt, edit "Parameters.txt" accordingly
 
 *Note: Ideally, place key/output directories in src folder
