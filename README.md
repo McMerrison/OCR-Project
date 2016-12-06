@@ -58,7 +58,7 @@ Prompt user for different functionality:
 4. Open "Parameters.txt"
 5. Edit as such:
 	
-	line 1: Path to directory of keys (text files with expected output of image set)
+	line 1: Path to directory of keys (text files with expected output of image set)*
 	
 	line 2: Number of OCRs to test
 	
@@ -68,7 +68,11 @@ Prompt user for different functionality:
 	
 	- Nickname for OCR 
 	
-	- Path to directory containing output text files of this OCR
+	- Path to directory containing output text files of this OCR*
+	
+6. Run "javac Main.java"
+7. Run "java Main"
+8. Follow prompt, edit "Parameters.txt" accordingly
 
 *Note: Ideally, place key/output directories in src folder
 
