@@ -6,53 +6,123 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.InputMismatchException;
 
 public class Main {
-
-	/*public static void runner() {
-		String s = null;
-		ArrayList<String> keys;
-		ArrayList<String> outputs;
-
-		try {
-
-			// run the Unix "ps -ef" command
-			// using the Runtime exec method:
-			Process p = Runtime.getRuntime().exec("ls -al");
-
-			BufferedReader stdInput = new BufferedReader(new
-					InputStreamReader(p.getInputStream()));
-
-			BufferedReader stdError = new BufferedReader(new
-					InputStreamReader(p.getErrorStream()));
-
-			// read the output from the command
-			System.out.println("Here is the standard output of the command:\n");
-			while ((s = stdInput.readLine()) != null) {
-				System.out.println(s);
-			}
-
-			// read any errors from the attempted command
-			System.out.println("Here is the standard error of the command (if any):\n");
-			while ((s = stdError.readLine()) != null) {
-				System.out.println(s);
-			}
-
-			//System.exit(0);
-		}
-		catch (IOException e) {
-			System.out.println("Exception happened - here's what I know: ");
-			e.printStackTrace();
-			System.exit(-1);
-		}
 	
-		//compare(keys, outputs);
-	}*/
+	
+	private static String executeCommand(String command) {
+
+		StringBuffer output = new StringBuffer();
+
+		Process p;
+		try {
+			p = Runtime.getRuntime().exec(command);
+			p.waitFor();
+			BufferedReader reader =
+                            new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+                        String line = "";
+			while ((line = reader.readLine())!= null) {
+				output.append(line + "\n");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return output.toString();
+
+	}
+	
+	/**
+	* Takes in a command and an image directory and then runs the command on all images
+	* in the image directory and returns the result as an arraylist.
+	* TODO: Possibly make pipes work
+	* TODO: Function is currently in testing mode
+	* @param cmd String, this is the command with picture.bmp
+	* @param imageDir String, output of OCR string
+	* @return outputs ArrayList<String>, returns an arraylist with all outputs
+	**/
+	public static ArrayList<String> runner(String cmd,String imageDir) {
+		String filepath;
+		ArrayList<String> outputs = new ArrayList<>();
+		imageDir = "TestImages/";//for testing purposes
+		cmd = "bmptopnm picture.bmp | gocr -v 0 -m 0 -e - -f UTF8 -"; //this string doesnt work because of the pipe
+		Path dir = Paths.get(imageDir);
+		int pIndex = cmd.indexOf("picture.bmp");
+		
+		//this if makes sure that picture.bmp exists in the command
+		if(pIndex > -1){
+			//System.out.println("Picture.bmp exists in file");
+			String firstHalf = cmd.substring(0,pIndex);
+			String secondHalf = cmd.substring(pIndex+11);
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+				//For each file
+				for (Path file: stream) {
+					System.out.println("Reading from " + file.getFileName());
+					filepath = imageDir + file.getFileName();
+					String command = firstHalf+filepath+secondHalf;
+					//System.out.println(command);
+					
+					//Process p = Runtime.getRuntime().exec(command);//run the command
+					 Process p = Runtime.getRuntime().exec("ls");
+
+					  p.waitFor();
+					  BufferedReader buf = new BufferedReader(new InputStreamReader(
+					          p.getInputStream()));
+					  String line = "";
+					  String output = "";
+
+					  while ((line = buf.readLine()) != null) {
+					    output += line + "\n";
+					  }
+					  outputs.add(output);
+
+					  System.out.println(output);
+
+				}
+			} catch (IOException | DirectoryIteratorException x) {
+				// IOException can never be thrown by the iteration.
+				// In this snippet, it can only be thrown by newDirectoryStream.
+				System.err.println(x);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
+			
+		}else{
+			System.out.println("ERROR: picture.bmp not in command.");
+		}
+		/*
+		Process p = Runtime.getRuntime().exec("ls -al");
+
+		BufferedReader stdInput = new BufferedReader(new
+				InputStreamReader(p.getInputStream()));
+
+		BufferedReader stdError = new BufferedReader(new
+				InputStreamReader(p.getErrorStream()));
+
+		// read the output from the command
+		System.out.println("Here is the standard output of the command:\n");
+		while ((s = stdInput.readLine()) != null) {
+			System.out.println(s);
+		}
+
+		// read any errors from the attempted command
+		System.out.println("Here is the standard error of the command (if any):\n");
+		while ((s = stdError.readLine()) != null) {
+			System.out.println(s);
+		}
+
+		//System.exit(0);
+*/
+	
+		return outputs;
+	}
 
 
 	/**
@@ -268,6 +338,7 @@ public class Main {
 						break;
 						
 				case 2:
+					runner("","");
 						break;
 						
 				case 3:
