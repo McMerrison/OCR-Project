@@ -11,28 +11,27 @@ import java.util.InputMismatchException;
 public class Main {
 	
 	
-	private static String executeCommand(String command) {
-
-		StringBuffer output = new StringBuffer();
-
-		Process p;
-		try {
-			p = Runtime.getRuntime().exec(command);
-			p.waitFor();
-			BufferedReader reader =
-                            new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-                        String line = "";
-			while ((line = reader.readLine())!= null) {
-				output.append(line + "\n");
+	public static boolean saveListToFile(String folderName,ArrayList<String> output){
+		File dir = new File(folderName);
+		if(dir.mkdir()){
+			int i = 0;
+			try {
+				for(String s: output){
+				PrintWriter out = new PrintWriter(folderName+"/Output" + i +".txt");
+				out.print(s);
+				out.close();
+				i++;
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("ERROR: Couldn't print to file");
+				//e.printStackTrace();
+				return false;
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		}else{
+			System.out.println("ERROR: Couldn't create directory");	
+			return false;
 		}
-
-		return output.toString();
-
+		return true;
 	}
 	
 	/**
@@ -120,7 +119,6 @@ public class Main {
 
 		//System.exit(0);
 */
-	
 		return outputs;
 	}
 
