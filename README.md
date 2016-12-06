@@ -67,7 +67,7 @@ Prompt user for different functionality:
 	
 	line 3: Number of images in current set
 	
-	Every pair of lines after: 
+	Every pair of lines after (Each pair should correspond to one OCR, # of pairs should match line 2): 
 	
 	- Nickname for OCR 
 	
