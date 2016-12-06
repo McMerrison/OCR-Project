@@ -81,6 +81,13 @@ Prompt user for different functionality:
 
 *Note: Ideally, place key/output directories in src folder
 
+### Format of output directories
+See "ImageKeys" and "TesseractOutput" folders for reference. Each text file should correspond to an image.
+1. Run OCR on image and redirect output to text file (any name)
+2. Repeat for all images and place text files in a folder (any name)
+3. Provide this folder name in Parameters.txt under correpsonding OCR nickname
+4. Keys will need to be entered manually (as only a human can determine the actual contents of an image). However, ImageKeys has already been provided for the image set provided. If a new image set is used, new key outputs will need to be written.
+
 
 ## Testing
 
