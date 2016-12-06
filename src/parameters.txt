@@ -1,0 +1,7 @@
+(Images Folder)
+TestImages/
+(Keys Folder)
+ImageKeys/
+(OCR)
+TesseractOutput
+ImageKeys
