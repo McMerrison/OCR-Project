@@ -1,11 +1,20 @@
+import java.awt.Color;
+import java.awt.Font;
 import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import org.jfree.ui.RefineryUtilities;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import java.util.InputMismatchException;
+import java.util.List;
 
 public class Main {
 
@@ -165,7 +174,7 @@ public class Main {
 	* @param path of folder containing text files
 	* @return array of strings, each containing the contents of one text file
 	**/
-	
+
 	public static ArrayList<Image> loadOCR(String path){
 		ArrayList<String> outputs = getAllKeys(path);
 		ArrayList<Image> images = new ArrayList<Image>();
@@ -174,6 +183,42 @@ public class Main {
 		}
 		return images;
 	}
+	
+    public static void BoxAndWhisker(ArrayList<OCR> OCRs) {
+
+        final DefaultBoxAndWhiskerCategoryDataset dataset 
+        = new DefaultBoxAndWhiskerCategoryDataset();
+        for (OCR o: OCRs) {
+        	List<Double> list = new ArrayList<Double>();
+            for(Image img : o.Images){
+                list.add((double)(img.score));
+            }
+            dataset.add(list, "OCR", o.name);
+        }
+        final CategoryAxis xAxis = new CategoryAxis("OCR");
+        final NumberAxis yAxis = new NumberAxis("Score");
+        yAxis.setAutoRangeIncludesZero(false);
+        final BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        renderer.setFillBox(true);
+        renderer.setSeriesPaint(0, Color.WHITE);
+        renderer.setSeriesOutlinePaint(0, Color.BLACK);
+        renderer.setUseOutlinePaintForWhiskers(true);
+        renderer.setMeanVisible(false);
+        final CategoryPlot plot = new CategoryPlot(dataset, xAxis, yAxis, renderer);
+        final JFreeChart chart = new JFreeChart(
+            "OCR BoxPlot",
+            new Font("SansSerif", Font.BOLD, 14),
+            plot,
+            false
+        );
+        final File file= new File("Chart.png");
+        try {
+			ChartUtilities.saveChartAsPNG(file, chart, 800, 500);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 	
 	
 	/**
@@ -293,16 +338,14 @@ public class Main {
 			"5 - Graph Data\n"+
 			"6 - Exit");
 			
-			//ERROR to fix: 
-			//Goes into infinite loop when letter is entered instead of number
 			int option = 7;
 			try {
 				do{
 					while (!s.hasNextInt()) s.next();//This should fix the infinite loop
 					option = s.nextInt();
-				}while(option < 0 || option > 5);//Make sure selected number is in requested range
+				}while(option < 0 || option > 6);//Make sure selected number is in requested range
 			} catch (InputMismatchException e) {
-				System.out.println("Please enter a number 1-5");
+				System.out.println("Please enter a number 0-6");
 			}
 			switch (option) {
 				case 0: System.out.println("Display scores of which OCR? (Enter ID)");
@@ -391,7 +434,8 @@ public class Main {
 						}
 						break;
 						
-				case 5: final BoxAndWhiskerDemo demo = new BoxAndWhiskerDemo("OCR Box-and-Whisker Chart",OCRs);
+				case 5: BoxAndWhisker(OCRs);
+						System.out.println("Graph saved to 'Chart.png'");
 						break;
 						
 				case 6: analyzing = false;
