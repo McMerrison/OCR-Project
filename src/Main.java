@@ -92,7 +92,6 @@ public class Main {
 				// In this snippet, it can only be thrown by newDirectoryStream.
 				System.err.println(x);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 				
@@ -159,6 +158,7 @@ public class Main {
 				}
 				allKeys.add(s);
 				s = "";
+				in.close();
 			}
 		} catch (IOException | DirectoryIteratorException x) {
 			// IOException can never be thrown by the iteration.
@@ -215,7 +215,6 @@ public class Main {
         try {
 			ChartUtilities.saveChartAsPNG(file, chart, 800, 500);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -226,7 +225,7 @@ public class Main {
 	* Store strings in ArrayLists
 	* Run compare() on each index to determine accuracy of OCR based on expected output
 	* @param directory containing keys, directory containing outputs
-	* (TODO): @return score array
+	* @return o OCR
 	*/
 	public static OCR align(ArrayList<String> a, OCR o) {
 		int size = a.size();
@@ -241,9 +240,9 @@ public class Main {
 	}
 	
 	public static void printScores(ArrayList<Image> Images) {
-		int i = 0;
+		int i = 1;
 		for (Image img: Images) {
-			System.out.println("Image " + i + ": " + img.score);
+			System.out.println(String.format("Image %02d: " + img.score,i));
 			i++;
 		}
 	}
@@ -255,7 +254,7 @@ public class Main {
 		}
 		System.out.println(String.format("\n%-10s   %10s   %10s","Image",f.name,s.name));
 		for (int i = 0; i<amt; i++) {
-			System.out.println(String.format("%-10s   %10d   %10d","Image"+i+":",f.Images.get(i).score,s.Images.get(i).score ));
+			System.out.println(String.format("%-10s   %10d   %10d",String.format("Image %02d:",i+1),f.Images.get(i).score,s.Images.get(i).score ));
 		}
 	}
 	
@@ -276,8 +275,8 @@ public class Main {
 
 	/**
 	* For each OCR:
-	* (TODO): Run OCR on image files, generate a folder of outputs
-	* (TODO): Pass the name of this folder to outputdir
+	* (Done): Run OCR on image files, generate a folder of outputs
+	* (Done): Pass the name of this folder to outputdir
 	* (Done): Pass outputdir to analyze method.
 	* (Done): analyzeOCR will call:
 	* 	(Done): getAllKeys() to parse data 
@@ -290,7 +289,8 @@ public class Main {
 		//This is where the keys are stored, does not change during session
 		Scanner s = new Scanner(System.in);
 		ArrayList<OCR> OCRs = new ArrayList<>();
-		System.out.println("Loading config file 'parameters.txt' .....");
+		System.out.println("\n-----WELCOME TO OCR ANALYZER-----");
+		System.out.println("Loading config file 'parameters.txt'");
 		ArrayList<String> Keys = new ArrayList<>();
 		String keyDir = "ImageKeys/";
 		String imageDir = "TestImages/";
@@ -364,7 +364,7 @@ public class Main {
 						System.out.println();
 						break;
 						
-				case 2: printOCRs(OCRs);//this needs work------------------------ 
+				case 2: printOCRs(OCRs); 
 						System.out.println(OCRs.size());
 						if(OCRs.size()<2){
 							System.out.println("You need to have atleast 2 OCRs Loaded to use this option");
@@ -430,7 +430,6 @@ public class Main {
 							out.close();
 							System.out.println("Summary of scores saved to ODRData.txt");
 						} catch (FileNotFoundException e) {
-							
 						}
 						break;
 						
@@ -438,7 +437,8 @@ public class Main {
 						System.out.println("Graph saved to 'Chart.png'");
 						break;
 						
-				case 6: analyzing = false;
+				case 6: s.close();
+						analyzing = false;
 						System.exit(0);
 						break;
 						
